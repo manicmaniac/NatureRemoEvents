@@ -1,0 +1,88 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width,initial-scale=1')
+    base(target='_top')
+    title NatureRemoEvents
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.21/moment-timezone-with-data-2012-2022.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.1.3/highstock.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/6.1.3/modules/series-label.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.min.js')
+  body
+    .container
+      ul.nav.nav-tabs(role='tablist')
+        li.nav-item
+          a.nav-link.active(href='#temparature', data-toggle='tab') Temparature
+        li.nav-item
+          a.nav-link(href='#humidity', data-toggle='tab') Humidity
+        li.nav-item
+          a.nav-link(href='#illumination', data-toggle='tab') Illumination
+      .tab-content
+        section#temparature.tab-pane.active
+          #temparature-chart
+        section#humidity.tab-pane
+          #humidity-chart
+        section#illumination.tab-pane
+          #illumination-chart
+    script.
+      Highcharts.setOptions({
+        time: {
+          timezone: <?= Session.getTimeZone(); ?>
+        }
+      });
+      function createChart(id, title, unit, data) {
+        Highcharts.stockChart(id, {
+          rangeSelector: {
+            selected: 0,
+            buttons: [
+              {
+                type: 'day',
+                count: 1,
+                text: '1d'
+              },
+              {
+                type: 'day',
+                count: 7,
+                text: '1w'
+              },
+              {
+                type: 'month',
+                count: 1,
+                text: '1m'
+              },
+              {
+                type: 'month',
+                count: 3,
+                text: '3m'
+              },
+              {
+                type: 'ytd',
+                text: 'YTD'
+              },
+            ]
+          },
+          title: { text: title, },
+          yAxis: {
+            title: { text: title + ' (' + unit + ')' }
+          },
+          plotOptions: {
+            series: {
+              label: { enabled: false }
+            }
+          },
+          series: [
+            {
+              name: title,
+              data: data,
+            }
+          ]
+        });
+      }
+      <? const spreadsheet = new NatureRemoEventsSpreadsheet(); ?>
+      createChart('temparature-chart', 'Temparature', '℃', JSON.parse(<?= spreadsheet.getDataAsJson('te'); ?>));
+      createChart('humidity-chart', 'Humidity', '%', JSON.parse(<?= spreadsheet.getDataAsJson('hu'); ?>));
+      createChart('illumination-chart', 'Illumination', 'lx', JSON.parse(<?= spreadsheet.getDataAsJson('il'); ?>));
